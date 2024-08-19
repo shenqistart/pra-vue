@@ -1,51 +1,57 @@
 class ReactiveEffect {
-    private _fn: any;
-  
-    constructor(fn) {
-      this._fn = fn;
-    }
-    run() {
-      activeEffect = this;
-      return this._fn();
-    }
+  private _fn: any;
+  public scheduler: Function | undefined;
+  constructor(fn, scheduler?: Function) {
+    this._fn = fn;
+    this.scheduler = scheduler;
   }
-  
-  const targetMap = new Map();
-  export function track(target, key) {
-    // target -> key -> dep
-    let depsMap = targetMap.get(target);
-    if (!depsMap) {
-      depsMap = new Map();
-      targetMap.set(target, depsMap);
-    }
+  run() {
+    activeEffect = this;
+    return this._fn();
+  }
+}
 
-  
-    let dep = depsMap.get(key);
-    if (!dep) {
-      dep = new Set();
-      depsMap.set(key, dep);
-    }
-  
-    dep.add(activeEffect);
+const targetMap = new Map();
+export function track(target, key) {
+  // target -> key -> dep
+  let depsMap = targetMap.get(target);
+  if (!depsMap) {
+    depsMap = new Map();
+    targetMap.set(target, depsMap);
   }
-  
-  export function trigger(target, key) {
-    let depsMap = targetMap.get(target);
-    let dep = depsMap.get(key);
-  
-    for (const effect of dep) {
+
+  let dep = depsMap.get(key);
+  if (!dep) {
+    dep = new Set();
+    depsMap.set(key, dep);
+  }
+
+  dep.add(activeEffect);
+}
+
+export function trigger(target, key) {
+  let depsMap = targetMap.get(target);
+  let dep = depsMap.get(key);
+
+  for (const effect of dep) {
+    if (effect.scheduler) {
+      effect.scheduler();
+    } else {
       effect.run();
     }
   }
+}
 //   全局effect函数的实例对象
-  let activeEffect;
-  export function effect(fn) {
-    // fn
-    const _effect = new ReactiveEffect(fn);
-  
-    _effect.run();
-    // 当调用 runner 的时候可以重新执行 effect.run
-    const runner = _effect.run.bind(_effect);
-    return runner
-  }
-  
+let activeEffect;
+type effectOptions = {
+  scheduler?: Function;
+}
+export function effect(fn,options:effectOptions={}) {
+  // fn
+  const _effect = new ReactiveEffect(fn,options.scheduler);
+
+  _effect.run();
+  // 当调用 runner 的时候可以重新执行 effect.run
+  const runner = _effect.run.bind(_effect);
+  return runner;
+}
