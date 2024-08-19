@@ -64,7 +64,7 @@ export function trigger(target, key) {
 let activeEffect;
 
 export function effect(fn, options: any = {}) {
-  // fn
+  // fn 将一个effect进行实例化封装
   const _effect = new ReactiveEffect(fn, options.scheduler);
     extend(_effect, options);
   _effect.run();
