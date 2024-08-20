@@ -1,12 +1,19 @@
 import { track, trigger } from "./effect";
-
+import { ReactiveFlags } from "./reactive";
+// 优化点，只执行一次
 const get = createGetter();
 const set = createSetter();
 const readonlyGet = createGetter(true);
 
 function createGetter(isReadonly = false) {
   return function get(target, key) {
+    if (key === ReactiveFlags.IS_REACTIVE) {
+      return !isReadonly;
+    } else if (key === ReactiveFlags.IS_READONLY) {
+      return isReadonly;
+    }
     const res = Reflect.get(target, key);
+
 
     if (!isReadonly) {
       track(target, key);
@@ -32,6 +39,7 @@ export const mutableHandlers = {
 export const readonlyHandlers = {
   get: readonlyGet,
   set(target, key) {
+    // 这里和测试相对应 warn的输出
     console.warn(
       `key :"${String(key)}" set 失败，因为 target 是 readonly 类型`,
       target
