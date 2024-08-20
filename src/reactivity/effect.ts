@@ -1,4 +1,7 @@
 import { extend } from "../shared";
+//   全局effect函数的实例对象
+let activeEffect;
+let shouldTrack = false;
 class ReactiveEffect {
   private _fn: any;
   deps = [];
@@ -10,8 +13,19 @@ class ReactiveEffect {
     this.scheduler = scheduler;
   }
   run() {
+    if (!this.active) {
+      return this._fn();
+    }
+
+    // 应该收集
+    shouldTrack = true;
     activeEffect = this;
-    return this._fn();
+    const r = this._fn();
+
+    // 重置
+    shouldTrack = false;
+
+    return r;
   }
   stop() {
     // stop 只执行一次
@@ -28,10 +42,14 @@ function cleanupEffect(effect) {
   effect.deps.forEach((dep: any) => {
     dep.delete(effect);
   });
+
+  // 把 effect.deps 清空
+  effect.deps.length = 0;
 }
 
 const targetMap = new Map();
 export function track(target, key) {
+  if (!isTracking()) return;
   // target -> key -> dep
   let depsMap = targetMap.get(target);
   if (!depsMap) {
@@ -44,9 +62,13 @@ export function track(target, key) {
     dep = new Set();
     depsMap.set(key, dep);
   }
-  if (!activeEffect) return;
+  // 看看 dep 之前有没有添加过，添加过的话 那么就不添加了
+  if (dep.has(activeEffect)) return;
   dep.add(activeEffect);
   activeEffect.deps.push(dep);
+}
+function isTracking() {
+  return shouldTrack && activeEffect !== undefined;
 }
 
 export function trigger(target, key) {
@@ -61,8 +83,7 @@ export function trigger(target, key) {
     }
   }
 }
-//   全局effect函数的实例对象
-let activeEffect;
+
 
 export function effect(fn, options: any = {}) {
   // fn 将一个effect进行实例化封装
