@@ -1,9 +1,9 @@
 import { extend } from "../shared";
 class ReactiveEffect {
   private _fn: any;
-  deps=[];
-  active=true;
-  onStop?:()=>void;
+  deps = [];
+  active = true;
+  onStop?: () => void;
   public scheduler: Function | undefined;
   constructor(fn, scheduler?: Function) {
     this._fn = fn;
@@ -14,6 +14,7 @@ class ReactiveEffect {
     return this._fn();
   }
   stop() {
+    // stop 只执行一次
     if (this.active) {
       cleanupEffect(this);
       if (this.onStop) {
@@ -24,10 +25,10 @@ class ReactiveEffect {
   }
 }
 function cleanupEffect(effect) {
-    effect.deps.forEach((dep: any) => {
-      dep.delete(effect);
-    });
-  }
+  effect.deps.forEach((dep: any) => {
+    dep.delete(effect);
+  });
+}
 
 const targetMap = new Map();
 export function track(target, key) {
@@ -43,7 +44,7 @@ export function track(target, key) {
     dep = new Set();
     depsMap.set(key, dep);
   }
-  if(!activeEffect) return;
+  if (!activeEffect) return;
   dep.add(activeEffect);
   activeEffect.deps.push(dep);
 }
@@ -66,10 +67,11 @@ let activeEffect;
 export function effect(fn, options: any = {}) {
   // fn 将一个effect进行实例化封装
   const _effect = new ReactiveEffect(fn, options.scheduler);
-    extend(_effect, options);
+  // _effect.onStop = options.onStop;
+  extend(_effect, options);
   _effect.run();
   // 当调用 runner 的时候可以重新执行 effect.run
-  const runner :any= _effect.run.bind(_effect);
+  const runner: any = _effect.run.bind(_effect);
   runner.effect = _effect;
   return runner;
 }

@@ -1,5 +1,5 @@
 import { reactive } from "../reactive";
-import { effect,stop } from "../effect";
+import { effect, stop } from "../effect";
 describe("effect", () => {
   it("happy path", () => {
     const user = reactive({
@@ -69,9 +69,9 @@ describe("effect", () => {
     obj.prop = 2;
     expect(dummy).toBe(2);
     stop(runner);
-      // obj.prop = 3;
-      // obj.prop = obj.prop + 1;这里会先吊用get，再去调用set
-      obj.prop++;
+    // obj.prop = 3;
+    // obj.prop = obj.prop + 1;这里会先吊用get，再去调用set
+    obj.prop++;
 
     expect(dummy).toBe(2);
 
