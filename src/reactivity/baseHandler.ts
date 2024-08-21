@@ -1,7 +1,7 @@
 import { track, trigger } from "./effect";
 import { reactive, ReactiveFlags, readonly,shallowReadonly } from "./reactive";
 import { isObject, extend } from "../shared";
-// 优化点，只执行一次
+// 优化点，只执行一次,在模块加载的时候就执行
 const get = createGetter();
 const set = createSetter();
 const readonlyGet = createGetter(true);

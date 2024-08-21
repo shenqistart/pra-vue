@@ -30,6 +30,7 @@ class ReactiveEffect {
   stop() {
     // stop 只执行一次
     if (this.active) {
+      // 通过effect去清理deps
       cleanupEffect(this);
       if (this.onStop) {
         this.onStop();
@@ -94,7 +95,7 @@ export function triggerEffects(dep) {
 
 
 export function effect(fn, options: any = {}) {
-  // fn 将一个effect进行实例化封装
+  // fn 将一个effect进行实例化封装,也就是测试用例中effect函数在实际中的实现
   const _effect = new ReactiveEffect(fn, options.scheduler);
   // _effect.onStop = options.onStop;
   extend(_effect, options);

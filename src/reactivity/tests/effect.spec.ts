@@ -6,12 +6,13 @@ describe("effect", () => {
       age: 10,
     });
     let nextAge;
-    // 外部影响
+    // 外部影响,执行effect，以及内部回调函数，同时触发get方法
     effect(() => {
+      // 这里调用get
       nextAge = user.age + 1;
     });
     expect(nextAge).toBe(11);
-    // updata，set
+    // updata，set, user.age = user.age + 1;调用get,set
     user.age++;
     expect(nextAge).toBe(12);
     expect(user.age).toBe(11);
@@ -32,9 +33,10 @@ describe("effect", () => {
   });
   it("scheduler", () => {
     // 第二个参数
-    // effect第一次执行的时候，会调用 fn
+    // effect第一次执行的时候，会调用 fn,但是不会调用scheduler
     // set 不会执行fn而是执行scheduler
-    // 当执runner的时候，会执行fn
+    // 当执runner的时候，会执行fn，
+    // 因此在trigger处去修改对应的触发
     let dummy;
     let run: any;
     const scheduler = vi.fn(() => {
@@ -79,7 +81,7 @@ describe("effect", () => {
     runner();
     expect(dummy).toBe(3);
   });
-
+// 在stop状态中，触发的回调钩子函数
   it("onStop", () => {
     const obj = reactive({
       foo: 1,
