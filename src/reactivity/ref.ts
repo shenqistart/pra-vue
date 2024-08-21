@@ -2,7 +2,8 @@ import { hasChanged, isObject } from "../shared";
 import { isTracking, trackEffects, triggerEffects } from "./effect";
 import { reactive } from "./reactive";
 
-// 差别就是，ref只是一个值
+// 差别就是，ref可能只是一个值,所以我们需要
+// trackRefValue(this);triggerEffects(this.dep);来绑定为对象
 
 class RefImpl {
   private _value: any;
@@ -22,7 +23,7 @@ class RefImpl {
   }
 
   set value(newValue) {
-    // 对比没有处理过的值，所以使用newValue
+    // 对比没有处理过的值，所以使用newValue， same value should not trigger
     if (hasChanged(newValue, this._rawValue)) {
       this._rawValue = newValue;
       this._value = convert(newValue);
