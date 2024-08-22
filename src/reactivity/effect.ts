@@ -2,7 +2,7 @@ import { extend } from "../shared";
 //   全局effect函数的实例对象
 let activeEffect;
 let shouldTrack = false;
-class ReactiveEffect {
+export class ReactiveEffect {
   private _fn: any;
   deps = [];
   active = true;
