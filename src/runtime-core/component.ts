@@ -3,13 +3,15 @@ import { initProps } from "./componentProps";
 import { PublicInstanceProxyHandlers } from "./componentPublicInstance";
 import { emit } from "./componentEmit";
 import { initSlots } from "./componentSlots";
-export function createComponentInstance(vnode) {
+export function createComponentInstance(vnode,parent) {
   const component = {
     vnode,
     type: vnode.type,
     setupState: {},
     props: {},
     slots: {},
+    provides: parent ? parent.provides : {},
+    parent,
     emit: () => {},
   };
   // 使用优化技巧 emit('add') 直接写事件，第一个参数完成，用户只能修改之后的参数
